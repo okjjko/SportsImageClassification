@@ -224,6 +224,50 @@ input:focus, textarea:focus, select:focus {{
 .gr-sample-text {{
     font-family: 'Inter', Arial, sans-serif !important;
 }}
+
+@media (prefers-color-scheme: dark) {{
+    :root {{
+        --parchment: #141413;
+        --ivory: #1c1c1a;
+        --near-black: #faf9f5;
+        --olive-gray: #b0aea5;
+        --stone-gray: #87867f;
+        --terracotta: #d97757;
+        --border-cream: #30302e;
+        --border-warm: #30302e;
+        --warm-sand: #2a2a28;
+        --charcoal-warm: #b0aea5;
+    }}
+
+    .app-header {{
+        box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+    }}
+
+    .card {{
+        box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+    }}
+
+    .upload-area {{
+        background: #1c1c1a !important;
+    }}
+
+    input:focus, textarea:focus, select:focus {{
+        box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.3) !important;
+    }}
+
+    .gr-button-primary:hover {{
+        background: #c96442 !important;
+    }}
+
+    .gr-button-secondary {{
+        background: #2a2a28 !important;
+        box-shadow: 0px 0px 0px 1px #3d3d3a !important;
+    }}
+
+    .gr-button-secondary:hover {{
+        background: #3d3d3a !important;
+    }}
+}}
 """
 
 
