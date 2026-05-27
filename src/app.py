@@ -224,6 +224,10 @@ input:focus, textarea:focus, select:focus {{
 .gr-sample-text {{
     font-family: 'Inter', Arial, sans-serif !important;
 }}
+
+button[aria-label="设置"], .settings {{
+    display: none !important;
+}}
 """
 
 
@@ -333,7 +337,7 @@ def create_interface():
             f"""
             <div class="footer">
                 <p>模型: EfficientNet-B0 · 100 个运动类别 · {status_text}</p>
-                <p>基于 PyTorch + Gradio 构建 | 设计风格: Claude 系</p>
+
             </div>
             """
         )
