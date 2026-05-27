@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+
+# IDE
+.claude/
+.vscode/
+.idea/
+
+# Gradio
+.gradio/
+
+# Dataset
+archive/
+
+# Model weights (keep directory)
+outputs/models/*.pth
+outputs/models/*.h5
+
+# Docs
+*.docx
+项目情况.txt
+nul
+
+# Temp
+Thumbs.db
+.DS_Store
