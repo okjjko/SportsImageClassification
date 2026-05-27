@@ -225,7 +225,7 @@ input:focus, textarea:focus, select:focus {{
     font-family: 'Inter', Arial, sans-serif !important;
 }}
 
-button[aria-label="设置"], .settings {{
+.theme-buttons, .banner-wrap:has(h2) {{
     display: none !important;
 }}
 """
