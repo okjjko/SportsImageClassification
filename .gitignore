@@ -16,7 +16,7 @@ dist/
 archive/
 
 # Model weights (keep directory)
-outputs/models/*.pth
+# outputs/models/*.pth
 outputs/models/*.h5
 
 # Docs
