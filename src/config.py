@@ -1,6 +1,5 @@
 """全局配置：路径、超参数"""
 
-import os
 from pathlib import Path
 
 # 项目根目录

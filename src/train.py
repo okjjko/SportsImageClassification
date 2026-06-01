@@ -1,6 +1,7 @@
 """训练与验证循环模块"""
 
 import copy
+import sys
 import time
 
 import torch
@@ -45,6 +46,10 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
 
         pbar.set_postfix(loss=f"{loss.item():.4f}", acc=f"{100.0 * correct / total:.1f}%")
 
+    if total == 0:
+        print("  [警告] 训练集为空，跳过此 epoch")
+        return 0.0, 0.0
+
     epoch_loss = running_loss / total
     epoch_acc = 100.0 * correct / total
     return epoch_loss, epoch_acc
@@ -71,6 +76,10 @@ def validate(model, loader, criterion, device):
             _, preds = torch.max(outputs, 1)
             correct += (preds == labels).sum().item()
             total += labels.size(0)
+
+    if total == 0:
+        print("  [警告] 验证集为空，跳过此 epoch")
+        return 0.0, 0.0
 
     epoch_loss = running_loss / total
     epoch_acc = 100.0 * correct / total
@@ -111,32 +120,9 @@ def train_model():
     print(f"学习率调度: StepLR(step_size={LR_STEP_SIZE}, gamma={LR_GAMMA})")
     print("-" * 70)
 
-    for epoch in range(1, NUM_EPOCHS + 1):
-        epoch_start = time.time()
-        current_lr = optimizer.param_groups[0]["lr"]
-
-        print(f"Epoch [{epoch}/{NUM_EPOCHS}]  lr={current_lr:.6f}")
-
-        train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
-        val_loss, val_acc = validate(model, val_loader, criterion, device)
-        scheduler.step()
-
-        history["train_loss"].append(train_loss)
-        history["train_acc"].append(train_acc)
-        history["val_loss"].append(val_loss)
-        history["val_acc"].append(val_acc)
-        history["lr"].append(current_lr)
-
-        elapsed = time.time() - epoch_start
-
-        print(f"  Train Loss: {train_loss:.4f}  Train Acc: {train_acc:.2f}%")
-        print(f"  Val   Loss: {val_loss:.4f}  Val   Acc: {val_acc:.2f}%")
-        print(f"  Time: {elapsed:.1f}s")
-
-        # 保存最佳模型
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            best_model_state = copy.deepcopy(model.state_dict())
+    def _save_best_checkpoint():
+        """保存当前最佳模型到磁盘。"""
+        if best_model_state is not None:
             checkpoint = {
                 "epoch": epoch,
                 "model_state_dict": best_model_state,
@@ -144,9 +130,55 @@ def train_model():
                 "val_acc": best_val_acc,
             }
             torch.save(checkpoint, str(BEST_MODEL_PATH))
-            print(f"  ** Best model saved (val_acc={val_acc:.2f}%)")
 
-        print("-" * 70)
+    try:
+        for epoch in range(1, NUM_EPOCHS + 1):
+            epoch_start = time.time()
+            current_lr = optimizer.param_groups[0]["lr"]
+
+            print(f"Epoch [{epoch}/{NUM_EPOCHS}]  lr={current_lr:.6f}")
+
+            train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
+            val_loss, val_acc = validate(model, val_loader, criterion, device)
+            scheduler.step()
+
+            history["train_loss"].append(train_loss)
+            history["train_acc"].append(train_acc)
+            history["val_loss"].append(val_loss)
+            history["val_acc"].append(val_acc)
+            history["lr"].append(current_lr)
+
+            elapsed = time.time() - epoch_start
+
+            print(f"  Train Loss: {train_loss:.4f}  Train Acc: {train_acc:.2f}%")
+            print(f"  Val   Loss: {val_loss:.4f}  Val   Acc: {val_acc:.2f}%")
+            print(f"  Time: {elapsed:.1f}s")
+
+            # 保存最佳模型
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                best_model_state = copy.deepcopy(model.state_dict())
+                _save_best_checkpoint()
+                print(f"  ** Best model saved (val_acc={val_acc:.2f}%)")
+
+            print("-" * 70)
+
+    except torch.cuda.OutOfMemoryError:
+        print("\n[错误] GPU 显存不足！建议：")
+        print("  1. 减小 BATCH_SIZE（当前: {}）".format(BATCH_SIZE))
+        print("  2. 减小 IMAGE_SIZE（当前: 224）")
+        _save_best_checkpoint()
+        print(f"已保存当前最佳模型（val_acc={best_val_acc:.2f}%）")
+        sys.exit(1)
+
+    except KeyboardInterrupt:
+        print("\n\n训练被用户中断")
+        _save_best_checkpoint()
+        if best_val_acc > 0:
+            print(f"已保存当前最佳模型（val_acc={best_val_acc:.2f}%）")
+        else:
+            print("尚未产生有效的模型权重，未保存")
+        sys.exit(0)
 
     # 加载最佳模型权重
     model.load_state_dict(best_model_state)

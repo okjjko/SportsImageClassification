@@ -1,5 +1,7 @@
 """推理模块"""
 
+import pickle
+
 import torch
 from PIL import Image
 
@@ -16,17 +18,46 @@ def load_model(model_path=None):
 
     Returns:
         model, class_names, device
+
+    Raises:
+        FileNotFoundError: 模型文件不存在
+        ValueError: 模型文件损坏或格式不正确
     """
     if model_path is None:
         model_path = BEST_MODEL_PATH
 
+    if not model_path.exists():
+        raise FileNotFoundError(
+            f"模型文件不存在: {model_path}\n请先运行 python run_train.py 训练模型"
+        )
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    checkpoint = torch.load(str(model_path), map_location=device, weights_only=False)
+    try:
+        checkpoint = torch.load(str(model_path), map_location=device, weights_only=False)
+    except (pickle.UnpicklingError, EOFError, RuntimeError) as e:
+        raise ValueError(
+            f"模型文件损坏或格式不正确: {model_path}\n请删除后重新训练"
+        ) from e
+
+    # 验证 checkpoint 结构完整性
+    required_keys = {"class_names", "model_state_dict"}
+    missing_keys = required_keys - set(checkpoint.keys())
+    if missing_keys:
+        raise ValueError(
+            f"模型文件缺少必要的键: {missing_keys}\n文件可能已损坏，请重新训练"
+        )
+
     class_names = checkpoint["class_names"]
 
-    model = create_efficientnet_b0(num_classes=len(class_names), pretrained=False)
-    model.load_state_dict(checkpoint["model_state_dict"])
+    try:
+        model = create_efficientnet_b0(num_classes=len(class_names), pretrained=False)
+        model.load_state_dict(checkpoint["model_state_dict"])
+    except RuntimeError as e:
+        raise ValueError(
+            f"模型权重与网络结构不匹配，请确认模型文件与当前代码版本一致\n详情: {e}"
+        ) from e
+
     model = model.to(device)
     model.eval()
 
