@@ -65,7 +65,7 @@ def _global_css():
         - 置信度标签条（.probability-bar）
         - 页脚（.footer）
         - 示例图片区（.example-label）
-        - 隐藏主题切换按钮（.theme-buttons）
+        - 隐藏主题切换区域（.banner-wrap，含"显示主题"标题和按钮）
 
     Returns:
         str: 完整的 CSS 字符串（含内嵌字体）
@@ -256,6 +256,10 @@ input:focus, textarea:focus, select:focus {{
 .theme-buttons {{
     display: none !important;
 }}
+
+button.settings {{
+    display: none !important;
+}}
 """
 
 
@@ -333,7 +337,7 @@ def create_interface():
         - 底部：模型信息与准确率状态栏（.footer）
 
     Returns:
-        gr.Blocks: 可调用 .launch() 启动的 Gradio 界面对象
+        tuple: (interface, css) Gradio 界面对象和 CSS 字符串
     """
     try:
         model, class_names, device = _get_model()
@@ -389,8 +393,6 @@ def create_interface():
                 example_images.append(str(files[0]))
 
     with gr.Blocks(
-        css=_global_css(),
-        theme=gr.themes.Soft(),
         title="Sports Image Classification",
     ) as interface:
         gr.HTML(
@@ -450,4 +452,4 @@ def create_interface():
             outputs=label_output,
         )
 
-    return interface
+    return interface, _global_css()
