@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>模型架构图 - EfficientNet-B0 运动图像分类</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .diagram {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 40px;
+    max-width: 900px;
+    width: 100%;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 30px;
+  }
+
+  /* 流程容器 */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* 通用块 */
+  .block {
+    width: 100%;
+    max-width: 680px;
+    border-radius: 10px;
+    padding: 14px 20px;
+    position: relative;
+  }
+
+  /* 箭头 */
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 28px;
+    position: relative;
+  }
+  .arrow::before {
+    content: '';
+    width: 2px;
+    height: 100%;
+    background: #bbb;
+  }
+  .arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #bbb;
+  }
+  .arrow .dim {
+    position: absolute;
+    right: calc(50% - 360px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: #999;
+    white-space: nowrap;
+  }
+
+  /* 输入 */
+  .input-block {
+    background: #e8f4f8;
+    border: 2px solid #4a90d9;
+  }
+  .input-block .title {
+    font-weight: 700;
+    color: #2c5f8a;
+    font-size: 14px;
+  }
+  .input-block .detail {
+    font-size: 12px;
+    color: #5a8ab5;
+    margin-top: 4px;
+  }
+
+  /* 预训练区域 */
+  .pretrained-zone {
+    width: 100%;
+    max-width: 680px;
+    border: 2px dashed #f0ad4e;
+    border-radius: 12px;
+    padding: 16px 16px 10px;
+    position: relative;
+    background: #fffcf5;
+  }
+  .pretrained-zone .zone-label {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background: #f0ad4e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 4px;
+  }
+  .pretrained-zone .zone-note {
+    font-size: 11px;
+    color: #c89b3c;
+    text-align: center;
+    margin-top: 6px;
+    padding-bottom: 4px;
+  }
+
+  /* Backbone 内部块 */
+  .backbone-block {
+    background: #fff3e0;
+    border: 1.5px solid #ff9800;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    padding: 10px 16px;
+  }
+  .backbone-block:last-child { margin-bottom: 0; }
+  .backbone-block .title {
+    font-weight: 700;
+    color: #e65100;
+    font-size: 13px;
+  }
+  .backbone-block .detail {
+    font-size: 11px;
+    color: #bf6900;
+    margin-top: 3px;
+    line-height: 1.6;
+  }
+  .backbone-block .sub-blocks {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .sub-block {
+    background: #fff;
+    border: 1px solid #ffb74d;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #e65100;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+  .sub-block .sub-title {
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .sub-block .sub-detail {
+    font-size: 10px;
+    color: #999;
+  }
+
+  /* 分隔线 - 分类头 */
+  .divider {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 0;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #ccc;
+  }
+  .divider span {
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+    font-weight: 700;
+  }
+
+  /* 分类头区域 */
+  .classifier-zone {
+    width: 100%;
+    max-width: 680px;
+    border: 2px dashed #5cb85c;
+    border-radius: 12px;
+    padding: 16px 16px 10px;
+    position: relative;
+    background: #f5faf5;
+  }
+  .classifier-zone .zone-label {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background: #5cb85c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 4px;
+  }
+
+  .cls-block {
+    background: #e8f5e9;
+    border: 1.5px solid #4caf50;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cls-block:last-child { margin-bottom: 0; }
+  .cls-block .cls-name {
+    font-weight: 700;
+    color: #2e7d32;
+    font-size: 13px;
+    min-width: 160px;
+  }
+  .cls-block .cls-detail {
+    font-size: 11px;
+    color: #558b2f;
+  }
+  .cls-block .cls-why {
+    font-size: 10px;
+    color: #999;
+    margin-top: 2px;
+  }
+
+  /* 输出 */
+  .output-block {
+    background: #fce4ec;
+    border: 2px solid #e91e63;
+  }
+  .output-block .title {
+    font-weight: 700;
+    color: #c2185b;
+    font-size: 14px;
+  }
+  .output-block .detail {
+    font-size: 12px;
+    color: #d81b60;
+    margin-top: 4px;
+  }
+
+  /* 图例 */
+  .legend {
+    margin-top: 24px;
+    padding: 14px 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.8;
+  }
+  .legend-title {
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <h1>EfficientNet-B0 运动图像分类模型架构</h1>
+  <p class="subtitle">全网络微调（Fine-tuning） · 100 类运动项目 · 输入 224×224</p>
+
+  <div class="flow">
+    <!-- 输入 -->
+    <div class="block input-block">
+      <div class="title">输入图像 (Input Image)</div>
+      <div class="detail">224 × 224 × 3 &nbsp;|&nbsp; ImageNet 归一化: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]</div>
+    </div>
+
+    <div class="arrow"><span class="dim">经数据增强（训练时）</span></div>
+
+    <!-- 预训练骨干 -->
+    <div class="pretrained-zone">
+      <div class="zone-label">ImageNet 预训练（冻结 ≠ 冻结，全部可训练）</div>
+
+      <div class="backbone-block">
+        <div class="title">Stem 卷积层</div>
+        <div class="detail">Conv2d(3→32, 3×3, stride=2) → BN → SiLU 激活 → 输出 112×112×32</div>
+      </div>
+
+      <div class="backbone-block">
+        <div class="title">Stage 1 ~ 7: MBConv 模块（核心特征提取）</div>
+        <div class="detail">
+          共 16 个 MBConv 块，通道数从 16 逐步扩展到 320，空间分辨率从 112×112 降至 7×7
+        </div>
+        <div class="sub-blocks">
+          <div class="sub-block">
+            <div class="sub-title">深度可分离卷积</div>
+            <div class="sub-detail">逐通道 3×3 卷积<br>大幅减少参数量</div>
+          </div>
+          <div class="sub-block">
+            <div class="sub-title">SE 注意力模块</div>
+            <div class="sub-detail">全局池化 → FC → Sigmoid<br>自适应加权通道重要性</div>
+          </div>
+          <div class="sub-block">
+            <div class="sub-title">残差连接 (Skip)</div>
+            <div class="sub-detail">输入直连输出<br>缓解梯度消失</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="backbone-block">
+        <div class="title">卷积尾 + 池化</div>
+        <div class="detail">Conv2d(320→1280, 1×1) → BN → SiLU → Adaptive AvgPool(1×1) → 输出 1280 维特征向量</div>
+      </div>
+
+      <div class="zone-note">参数量: 4.0M（骨干） &nbsp;|&nbsp; 微调学习率: 1e-4（防止破坏预训练特征）</div>
+    </div>
+
+    <div class="arrow"><span class="dim">1280 维特征</span></div>
+
+    <div class="divider"><span>以下为自定义分类头（从头训练）</span></div>
+
+    <!-- 分类头 -->
+    <div class="classifier-zone">
+      <div class="zone-label">自定义分类器 (Classifier Head)</div>
+
+      <div class="cls-block">
+        <div class="cls-name">Dropout(p=0.3)</div>
+        <div>
+          <div class="cls-detail">训练时随机丢弃 30% 的输入特征</div>
+          <div class="cls-why">作用：抑制骨干网络 1280 维输出中的冗余信息，降低过拟合风险</div>
+        </div>
+      </div>
+
+      <div class="cls-block">
+        <div class="cls-name">Linear(1280 → 512)</div>
+        <div>
+          <div class="cls-detail">全连接层降维：1280 维 → 512 维</div>
+          <div class="cls-why">作用：提供特征空间过渡，避免 1280 维直接映射到 100 类的维度跳跃</div>
+        </div>
+      </div>
+
+      <div class="cls-block">
+        <div class="cls-name">ReLU 激活</div>
+        <div>
+          <div class="cls-detail">非线性激活函数: max(0, x)</div>
+          <div class="cls-why">作用：引入非线性变换，增强分类器的判别能力</div>
+        </div>
+      </div>
+
+      <div class="cls-block">
+        <div class="cls-name">Dropout(p=0.2)</div>
+        <div>
+          <div class="cls-detail">训练时随机丢弃 20% 的神经元</div>
+          <div class="cls-why">作用：第二层正则化，防止中间层过度依赖少数特征（级联 Dropout）</div>
+        </div>
+      </div>
+
+      <div class="cls-block">
+        <div class="cls-name">Linear(512 → 100)</div>
+        <div>
+          <div class="cls-detail">输出层：512 维 → 100 个类别的 logits</div>
+          <div class="cls-why">作用：最终分类决策层，每个输出对应一个运动类别</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow"><span class="dim">100 维 logits</span></div>
+
+    <!-- 输出 -->
+    <div class="block output-block">
+      <div class="title">Softmax → 输出概率分布</div>
+      <div class="detail">
+        100 个类别的置信度分数 &nbsp;|&nbsp; 取 Top-3 作为最终预测结果
+        <br>损失函数: CrossEntropyLoss（内含 Softmax）&nbsp;|&nbsp; 推理时显式 Softmax 得到概率
+      </div>
+    </div>
+  </div>
+
+  <!-- 图例 -->
+  <div class="legend">
+    <div class="legend-title">图例</div>
+    <div class="legend-item">
+      <div class="legend-color" style="background:#e8f4f8; border:2px solid #4a90d9;"></div>
+      <span>输入数据</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background:#fff3e0; border:1.5px solid #ff9800;"></div>
+      <span>预训练骨干网络（ImageNet 预训练权重 + 全网络微调）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background:#e8f5e9; border:1.5px solid #4caf50;"></div>
+      <span>自定义分类头（随机初始化，从头训练）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background:#fce4ec; border:2px solid #e91e63;"></div>
+      <span>输出结果</span>
+    </div>
+    <div style="margin-top:8px;">
+      <strong>总参数量:</strong> ~5.3M（骨干 4.0M + 分类头 0.7M + 其他 0.6M）
+      &nbsp;|&nbsp; <strong>FLOPs:</strong> 0.4G
+      &nbsp;|&nbsp; <strong>训练策略:</strong> 全网络微调，Adam(lr=1e-4)，StepLR(step=5, γ=0.5)，15 epochs
+    </div>
+  </div>
+</div>
+</body>
+</html>

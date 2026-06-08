@@ -12,7 +12,7 @@ from src.app import create_interface
 if __name__ == "__main__":
     interface, css = create_interface()
     interface.launch(
-        share=False,
+        share=True,
         css=css,
         theme=gr.themes.Soft(),
     )

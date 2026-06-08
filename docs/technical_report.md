@@ -40,7 +40,7 @@
 1. **精度目标驱动**：本项目数据集（100 类运动图片）与 ImageNet 的通用物体类别存在明显的域差异。选项 A 冻结卷积层意味着特征提取器无法学习运动场景特有的视觉模式（如特定运动姿态、装备），分类精度将受限。选项 B 全网络微调允许所有层适应运动场景，精度上限更高。
 2. **更先进的架构**：选项 B 可选用 EfficientNet 等现代架构，在参数效率和精度上远超选项 A 的 ResNet/MobileNetV2。
 3. **已有验证支撑**：参考实验已证明 EfficientNet-B0 全网络微调在本数据集上可达 **98.40%** 的测试准确率，充分验证了选项 B 方案的可行性。
-4. **正则化可控**：虽然全网络微调过拟合风险更高，但通过组合 Dropout（0.3+0.2）、数据增强、学习率衰减、weight_decay 等正则化手段，可以有效控制风险。
+4. **正则化可控**：虽然全网络微调过拟合风险更高，但通过组合 Dropout（0.3+0.2）、数据增强、学习率衰减等正则化手段，可以有效控制风险。
 
 ---
 
@@ -120,7 +120,7 @@
 | 设计 | 结构 | 参数量 | 特征空间变换 |
 |------|------|--------|------------|
 | 单层 Linear | `Linear(1280 → 100)` | 128,100 | 直接映射，无中间表示 |
-| **两层 FC** | `Linear(1280→512) → ReLU → Dropout(0.3) → Linear(512→100) → Dropout(0.2)` | 706,612 | 1280→512 降维过渡，特征空间更紧凑 |
+| **两层 FC** | `Dropout(0.3) → Linear(1280→512) → ReLU → Dropout(0.2) → Linear(512→100)` | 706,612 | 1280→512 降维过渡，特征空间更紧凑 |
 
 ### 最终选择：**两层全连接 + Dropout**
 
@@ -142,11 +142,11 @@ model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
 # 替换原始分类头为两层全连接
 num_classes = 100
 model.classifier = nn.Sequential(
-    nn.Linear(1280, 512),       # 1280 → 512 降维过渡
-    nn.ReLU(),                  # 非线性激活
-    nn.Dropout(p=0.3),          # 第一层 Dropout
-    nn.Linear(512, num_classes),# 512 → 100 分类
-    nn.Dropout(p=0.2)           # 第二层 Dropout
+    nn.Dropout(p=0.3),              # 第一层 Dropout
+    nn.Linear(1280, 512),           # 1280 → 512 降维过渡
+    nn.ReLU(),                      # 非线性激活
+    nn.Dropout(p=0.2),              # 第二层 Dropout
+    nn.Linear(512, num_classes),    # 512 → 100 分类
 )
 ```
 
@@ -164,9 +164,9 @@ model.classifier = nn.Sequential(
 | 泛化能力（理论） | 略逊于 SGD | 略优（但差距在实际中不显著） |
 | 适合场景 | 微调、中小数据集 | 大数据集从头训练 |
 
-**选择：Adam（lr=1e-4, weight_decay=1e-4）**
+**选择：Adam（lr=1e-4）**
 
-**理由：** 任务书明确指出，选项 B 微调需要"使用非常小的学习率"。Adam 的自适应学习率能快速适应不同参数的不同梯度尺度，收敛更快且更稳定。在小数据集上，SGD 需要精细调参才能达到相当效果，而 Adam 对超参数更鲁棒。`weight_decay=1e-4` 提供轻量级 L2 正则化。
+**理由：** 任务书明确指出，选项 B 微调需要"使用非常小的学习率"。Adam 的自适应学习率能快速适应不同参数的不同梯度尺度，收敛更快且更稳定。在小数据集上，SGD 需要精细调参才能达到相当效果，而 Adam 对超参数更鲁棒。
 
 ### 学习率调度：StepLR vs CosineAnnealing
 
@@ -242,7 +242,6 @@ val_transform = transforms.Compose([
 |--------|-----|---------|
 | `batch_size` | 32 | RTX 4060 8GB 显存可承受 EfficientNet-B0 + 224×224 输入；32 是常见经验值，不会太小（梯度噪声大、训练不稳定）也不会太大（泛化性能差） |
 | `learning_rate` | 1e-4 | 任务书要求微调使用"非常小的学习率"；比从头训练的 1e-3 小一个数量级；避免过大的学习率破坏预训练权重 |
-| `weight_decay` | 1e-4 | 标准 L2 正则化强度，对全网络微调提供适度约束 |
 | `epochs` | 15 | 配合 StepLR（每 5 epoch ×0.5），学习率经过 3 次衰减，实验验证足以收敛；过多 epoch 在小数据集上易过拟合 |
 | `num_workers` | 4 | 数据加载并行度，匹配 4 核 CPU 的典型配置，确保数据加载不成为瓶颈 |
 
@@ -257,7 +256,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
+optimizer = optim.Adam(model.parameters(), lr=1e-4)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
 
 num_epochs = 15
