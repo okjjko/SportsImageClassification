@@ -24,6 +24,13 @@ outputs/models/*.h5
 项目情况.txt
 nul
 
+# Web frontend
+web/node_modules/
+web/dist/
+
+# Uploaded images
+web/history_images/
+
 # Temp
 Thumbs.db
 .DS_Store
