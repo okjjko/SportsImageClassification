@@ -73,6 +73,7 @@ def _global_css():
     return f"""
 {_font_css()}
 
+/* ===== CSS 变量 ===== */
 :root {{
     --parchment: #f5f4ed;
     --ivory: #faf9f5;
@@ -86,8 +87,12 @@ def _global_css():
     --charcoal-warm: #4d4c48;
 }}
 
+/* ===== 全局背景 + 点阵纹理 ===== */
 html, body, .gradio-container {{
-    background: var(--parchment) !important;
+    background:
+        radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px),
+        var(--parchment) !important;
+    background-size: 20px 20px, auto !important;
     font-family: 'Inter', Arial, sans-serif !important;
     color: var(--near-black);
 }}
@@ -95,9 +100,30 @@ html, body, .gradio-container {{
 .gradio-container {{
     max-width: 1100px !important;
     margin: 0 auto !important;
-    padding: 24px 16px !important;
+    padding: 32px 24px !important;
 }}
 
+/* ===== 自定义滚动条 ===== */
+::-webkit-scrollbar {{
+    width: 8px;
+    height: 8px;
+}}
+::-webkit-scrollbar-track {{
+    background: var(--parchment);
+}}
+::-webkit-scrollbar-thumb {{
+    background: var(--border-warm);
+    border-radius: 4px;
+}}
+::-webkit-scrollbar-thumb:hover {{
+    background: var(--terracotta);
+}}
+* {{
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-warm) var(--parchment);
+}}
+
+/* ===== 排版 ===== */
 h1, h2, h3, h4 {{
     font-family: 'Source Serif 4', Georgia, serif !important;
     font-weight: 500 !important;
@@ -105,19 +131,41 @@ h1, h2, h3, h4 {{
     letter-spacing: -0.01em;
 }}
 
+/* ===== 标题区 — 渐变背景 + 装饰线 ===== */
 .app-header {{
-    background: var(--ivory) !important;
+    background: linear-gradient(135deg, var(--ivory) 0%, #f0ede3 50%, var(--ivory) 100%) !important;
     border: 1px solid var(--border-cream) !important;
     border-radius: 16px !important;
     padding: 24px 32px !important;
-    box-shadow: rgba(0,0,0,0.04) 0px 4px 20px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.6),
+        rgba(0,0,0,0.04) 0px 4px 20px !important;
     margin-bottom: 20px !important;
+    position: relative;
+}}
+
+.app-header::after {{
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 32px;
+    right: 32px;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--terracotta) 20%,
+        var(--terracotta) 80%,
+        transparent
+    );
+    border-radius: 0 0 16px 16px;
 }}
 
 .app-header h1 {{
-    font-size: 28px !important;
+    font-size: 32px !important;
     margin: 0 0 4px 0 !important;
     line-height: 1.2 !important;
+    letter-spacing: -0.025em;
 }}
 
 .app-header p {{
@@ -128,19 +176,34 @@ h1, h2, h3, h4 {{
     line-height: 1.5 !important;
 }}
 
+/* ===== 卡片 — 多层阴影 + hover 浮起 ===== */
 .card {{
     background: var(--ivory) !important;
     border: 1px solid var(--border-cream) !important;
     border-radius: 12px !important;
     padding: 20px !important;
-    box-shadow: rgba(0,0,0,0.03) 0px 2px 12px !important;
+    box-shadow:
+        0 1px 2px rgba(0,0,0,0.03),
+        0 4px 6px rgba(0,0,0,0.03),
+        0 12px 24px rgba(201, 100, 66, 0.04) !important;
     height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}}
+
+.card:hover {{
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 6px 12px rgba(0,0,0,0.05),
+        0 16px 32px rgba(201, 100, 66, 0.06) !important;
 }}
 
 .card h3 {{
     font-size: 18px !important;
     margin: 0 0 12px 0 !important;
     color: var(--near-black);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-cream);
 }}
 
 .card p, .card label {{
@@ -148,48 +211,96 @@ h1, h2, h3, h4 {{
     color: var(--olive-gray) !important;
 }}
 
+/* ===== 上传区 — 拖拽效果 ===== */
 .upload-area {{
     border: 2px dashed var(--border-warm) !important;
     border-radius: 12px !important;
-    background: var(--parchment) !important;
+    background:
+        radial-gradient(ellipse at center, rgba(201,100,66,0.04) 0%, transparent 70%),
+        var(--parchment) !important;
     padding: 20px !important;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }}
 
 .upload-area:hover {{
     border-color: var(--terracotta) !important;
+    background:
+        radial-gradient(ellipse at center, rgba(201,100,66,0.08) 0%, transparent 70%),
+        var(--parchment) !important;
+    box-shadow: inset 0 0 12px rgba(201, 100, 66, 0.06);
 }}
 
+/* 上传图标 SVG 颜色 */
+.upload-area svg {{
+    color: var(--terracotta) !important;
+    fill: var(--terracotta) !important;
+}}
+
+/* ===== 按钮 — 渐变 + 涟漪 ===== */
 button, .gr-button {{
     font-family: 'Inter', Arial, sans-serif !important;
     font-weight: 500 !important;
     border-radius: 8px !important;
-    transition: all 0.15s ease !important;
+    transition: all 0.2s ease !important;
+    position: relative;
+    overflow: hidden;
+}}
+
+button::after {{
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+    opacity: 0;
+}}
+
+button:active::after {{
+    width: 200px;
+    height: 200px;
+    opacity: 1;
+    transition: 0s;
 }}
 
 .gr-button-primary {{
-    background: var(--terracotta) !important;
+    background: linear-gradient(135deg, var(--terracotta), #b85a3a) !important;
     border: none !important;
     color: #fff !important;
-    box-shadow: 0px 0px 0px 1px var(--terracotta) !important;
+    box-shadow:
+        0 1px 2px rgba(0,0,0,0.08),
+        0 2px 8px rgba(201, 100, 66, 0.2) !important;
 }}
 
 .gr-button-primary:hover {{
-    background: #b85a3a !important;
-    box-shadow: 0px 0px 0px 2px #d97757 !important;
+    box-shadow:
+        0 2px 4px rgba(0,0,0,0.1),
+        0 4px 16px rgba(201, 100, 66, 0.3) !important;
+    transform: translateY(-1px);
 }}
 
 .gr-button-secondary {{
     background: var(--warm-sand) !important;
     border: none !important;
     color: var(--charcoal-warm) !important;
-    box-shadow: 0px 0px 0px 1px #d1cfc5 !important;
+    box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 2px 6px rgba(0,0,0,0.04) !important;
 }}
 
 .gr-button-secondary:hover {{
     background: #dddacf !important;
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.06),
+        0 4px 12px rgba(0,0,0,0.06) !important;
+    transform: translateY(-1px);
 }}
 
+/* ===== 输入控件 ===== */
 input, textarea, select, .gr-input, .gr-dropdown {{
     border-radius: 12px !important;
     border: 1px solid var(--border-warm) !important;
@@ -205,6 +316,7 @@ input:focus, textarea:focus, select:focus {{
     box-shadow: 0 0 0 2px rgba(201, 100, 66, 0.15) !important;
 }}
 
+/* ===== Label 结果区 ===== */
 .gr-label {{
     font-family: 'Inter', Arial, sans-serif !important;
 }}
@@ -219,20 +331,99 @@ input:focus, textarea:focus, select:focus {{
     background: var(--terracotta) !important;
 }}
 
+/* ===== #result-label — 结果区增强样式 ===== */
+#result-label {{
+    animation: fadeInScale 0.4s ease-out;
+}}
+
+#result-label h2 {{
+    font-family: 'Source Serif 4', Georgia, serif !important;
+    font-size: 24px !important;
+    color: var(--terracotta) !important;
+    font-weight: 600 !important;
+}}
+
+#result-label button.confidence-set {{
+    transition: background 0.15s ease;
+    border-radius: 6px;
+}}
+
+#result-label button.confidence-set:hover {{
+    background: rgba(201, 100, 66, 0.06) !important;
+}}
+
+#result-label meter.bar {{
+    background: linear-gradient(90deg, var(--terracotta), #d97757) !important;
+    border-radius: 6px !important;
+    height: 6px !important;
+}}
+
+#result-label dd.confidence {{
+    font-family: 'JetBrains Mono', monospace !important;
+    color: var(--terracotta) !important;
+    font-weight: 600 !important;
+}}
+
+@keyframes fadeInScale {{
+    from {{
+        opacity: 0;
+        transform: scale(0.96);
+    }}
+    to {{
+        opacity: 1;
+        transform: scale(1);
+    }}
+}}
+
+/* ===== 示例图片网格 ===== */
+.example-grid {{
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+}}
+
+.example-grid button {{
+    border: 2px solid transparent !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    padding: 2px !important;
+}}
+
+.example-grid button:hover {{
+    border-color: var(--terracotta) !important;
+    transform: scale(1.03);
+    box-shadow: 0 2px 8px rgba(201, 100, 66, 0.15);
+}}
+
+/* ===== 页脚 — 装饰线 ===== */
 .footer {{
     text-align: center !important;
     padding: 16px 0 8px 0 !important;
     border-top: 1px solid var(--border-cream) !important;
     margin-top: 20px !important;
+    position: relative;
+}}
+
+.footer::before {{
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: var(--terracotta);
+    margin: 0 auto 12px auto;
+    border-radius: 1px;
 }}
 
 .footer p {{
     font-family: 'Inter', Arial, sans-serif !important;
     font-size: 12px !important;
     color: var(--stone-gray) !important;
-    margin: 2px 0 !important;
+    margin: 4px 0 !important;
+    letter-spacing: 0.02em;
+    line-height: 1.6;
 }}
 
+/* ===== 其他组件 ===== */
 .gr-gallery {{
     border: none !important;
 }}
@@ -406,12 +597,13 @@ def create_interface():
 
         with gr.Row(equal_height=False):
             with gr.Column(scale=3, min_width=320):
-                with gr.Group(elem_classes="card"):
+                with gr.Group(elem_classes="card upload-card"):
                     gr.HTML("<h3>上传图片</h3>")
                     image_input = gr.Image(
                         type="pil",
                         label="",
                         show_label=False,
+                        elem_id="image-upload",
                         elem_classes="upload-area",
                     )
 
@@ -420,20 +612,23 @@ def create_interface():
                             "<div class=\"example-label\">"
                             "快速测试 — 点击下方示例图片</div>"
                         )
-                        gr.Examples(
-                            examples=example_images,
-                            inputs=image_input,
-                            label="",
-                            examples_per_page=6,
-                        )
+                        with gr.Column(elem_classes="example-grid"):
+                            gr.Examples(
+                                examples=example_images,
+                                inputs=image_input,
+                                label="",
+                                examples_per_page=6,
+                            )
 
             with gr.Column(scale=2, min_width=280):
-                with gr.Group(elem_classes="card"):
+                with gr.Group(elem_classes="card result-card"):
                     gr.HTML("<h3>识别结果</h3>")
                     label_output = gr.Label(
                         num_top_classes=3,
                         label="",
                         show_label=False,
+                        elem_id="result-label",
+                        color="#faf9f5",
                     )
 
         status_text = get_status()
