@@ -10,14 +10,30 @@ export default function BatchTab({ onPredictionDone }) {
 
   const handleFiles = (newFiles) => {
     const arr = Array.from(newFiles).filter((f) => f.type.startsWith("image/"))
-    setFiles(arr)
-    setPreviews(arr.map((f) => URL.createObjectURL(f)))
+    if (arr.length === 0) return
+    setFiles((prev) => [...prev, ...arr])
+    setPreviews((prev) => [...prev, ...arr.map((f) => URL.createObjectURL(f))])
     setResults(null)
   }
 
   const handleDrop = (e) => {
     e.preventDefault()
     handleFiles(e.dataTransfer.files)
+  }
+
+  const removeFile = (index) => {
+    if (predicting) return
+    URL.revokeObjectURL(previews[index])
+    setFiles((prev) => prev.filter((_, i) => i !== index))
+    setPreviews((prev) => prev.filter((_, i) => i !== index))
+    setResults(null)
+  }
+
+  const clearAll = () => {
+    previews.forEach((url) => URL.revokeObjectURL(url))
+    setFiles([])
+    setPreviews([])
+    setResults(null)
   }
 
   const handlePredict = async () => {
@@ -69,9 +85,15 @@ export default function BatchTab({ onPredictionDone }) {
               onClick={() => fileRef.current?.click()}
               style={{ cursor: "pointer" }}
             >
-              <div className="upload-icon">📁</div>
-              <div className="upload-text">拖拽图片到此处，或点击选择</div>
-              <div className="upload-hint">支持 JPG / PNG 格式，可一次上传多张</div>
+              <div className="upload-icon">{previews.length > 0 ? '➕' : '📁'}</div>
+              <div className="upload-text">
+                {previews.length > 0 ? '继续添加图片' : '拖拽图片到此处，或点击选择'}
+              </div>
+              <div className="upload-hint">
+                {previews.length > 0
+                  ? `已选 ${previews.length} 张，可继续追加`
+                  : '支持 JPG / PNG 格式，可一次上传多张'}
+              </div>
             </div>
             <input
               ref={fileRef}
@@ -79,16 +101,30 @@ export default function BatchTab({ onPredictionDone }) {
               accept="image/*"
               multiple
               style={{ display: "none" }}
-              onChange={(e) => handleFiles(e.target.files)}
+              onChange={(e) => {
+                handleFiles(e.target.files)
+                e.target.value = ""
+              }}
             />
-            <button
-              className="btn btn-primary"
-              disabled={files.length === 0 || predicting}
-              onClick={handlePredict}
-              style={{ marginTop: 12, width: "100%" }}
-            >
-              {predicting ? <span className="loading" /> : "开始识别"}
-            </button>
+            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+              <button
+                className="btn btn-primary"
+                disabled={files.length === 0 || predicting}
+                onClick={handlePredict}
+                style={{ flex: 1 }}
+              >
+                {predicting ? <span className="loading" /> : "开始识别"}
+              </button>
+              {files.length > 0 && (
+                <button
+                  className="btn btn-secondary"
+                  disabled={predicting}
+                  onClick={clearAll}
+                >
+                  清空
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="col" style={{ flex: 5, minWidth: 400 }}>
@@ -99,9 +135,16 @@ export default function BatchTab({ onPredictionDone }) {
                 </div>
                 <div className="gallery">
                   {previews.map((url, i) => (
-                    <div key={i} className="gallery-item">
+                    <div key={url} className="gallery-item">
                       <img src={url} alt="" />
                       <span className="gallery-num">{i + 1}</span>
+                      <button
+                        className="gallery-remove"
+                        onClick={(e) => { e.stopPropagation(); removeFile(i) }}
+                        title="移除此图片"
+                      >
+                        &times;
+                      </button>
                     </div>
                   ))}
                 </div>

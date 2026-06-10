@@ -209,6 +209,9 @@ h1, h2, h3, h4 {
 .gallery-item { width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-cream); position: relative; }
 .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gallery-item .gallery-num { position: absolute; top: 2px; left: 2px; background: rgba(0,0,0,0.5); color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 4px; }
+.gallery-remove { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border: none; border-radius: 50%; background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity 0.15s ease, background 0.15s ease; padding: 0; z-index: 1; }
+.gallery-item:hover .gallery-remove { opacity: 1; }
+.gallery-remove:hover { background: var(--terracotta); }
 
 .batch-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
 .batch-table th { background: linear-gradient(135deg, var(--warm-sand), var(--border-cream)); color: var(--near-black); font-weight: 500; padding: 8px 10px; text-align: left; border-bottom: 2px solid var(--terracotta); }
