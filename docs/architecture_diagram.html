@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>系统架构图 — 运动图像分类系统</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "微软雅黑", "Segoe UI", Arial, sans-serif;
+    background: #f8f9fb;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .container {
+    width: 1100px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .main-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+  }
+  .sub-title {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 32px;
+    letter-spacing: 1px;
+  }
+
+  /* ── Layer Styles ── */
+  .layer {
+    border-radius: 10px;
+    margin-bottom: 0;
+    overflow: hidden;
+  }
+  .layer-header {
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .layer-header .en {
+    font-weight: 400;
+    opacity: 0.85;
+    font-size: 13px;
+  }
+  .layer-body {
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* ── App Layer (Blue) ── */
+  .layer-app .layer-header { background: linear-gradient(135deg, #4472C4, #5B9BD5); }
+  .layer-app .layer-body { background: #EBF1F8; }
+
+  /* ── Model Layer (Green) ── */
+  .layer-model .layer-header { background: linear-gradient(135deg, #548235, #70AD47); }
+  .layer-model .layer-body { background: #EDF5E8; }
+
+  /* ── Data Layer (Gray) ── */
+  .layer-data .layer-header { background: linear-gradient(135deg, #595959, #808080); }
+  .layer-data .layer-body { background: #F2F2F2; }
+
+  /* ── Module Card ── */
+  .module {
+    background: #fff;
+    border-radius: 8px;
+    padding: 14px 16px;
+    min-width: 200px;
+    flex: 1;
+    max-width: 320px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-left: 4px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .module .mod-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1a1a2e;
+  }
+  .module .mod-path {
+    font-size: 11px;
+    color: #888;
+    font-family: "Cascadia Code", "Consolas", monospace;
+  }
+  .module .mod-desc {
+    font-size: 11.5px;
+    color: #555;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  /* Card accent colors */
+  .layer-app .module { border-left-color: #4472C4; }
+  .layer-model .module { border-left-color: #70AD47; }
+  .layer-data .module { border-left-color: #808080; }
+
+  /* ── Arrow Section ── */
+  .arrow-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    gap: 12px;
+  }
+  .arrow-line {
+    flex: 0 0 40px;
+    height: 2px;
+    background: #aaa;
+    position: relative;
+  }
+  .arrow-line::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid #aaa;
+  }
+  .arrow-label {
+    font-size: 12px;
+    color: #777;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid #e0e0e0;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #555;
+  }
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="main-title">运动图像分类系统 — 三层架构图</div>
+  <div class="sub-title">React + FastAPI 前后端分离架构</div>
+
+  <!-- ═══ Application Layer ═══ -->
+  <div class="layer layer-app">
+    <div class="layer-header">
+      <span>应用层</span>
+      <span class="en">Application Layer</span>
+    </div>
+    <div class="layer-body">
+      <div class="module">
+        <div class="mod-name">React 前端</div>
+        <div class="mod-path">web/src/</div>
+        <div class="mod-desc">单张识别 · 批量分类 · 历史记录 · 结果详情展示<br>Vite + React 19 组件化 UI</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">FastAPI 后端</div>
+        <div class="mod-path">src/api.py + run_api.py</div>
+        <div class="mod-desc">RESTful API 接口 · 单张/批量预测<br>历史记录管理 · 示例图片服务 · Uvicorn 部署</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">训练入口</div>
+        <div class="mod-path">run_train.py</div>
+        <div class="mod-desc">数据分析 → 模型训练 → 验证评估<br>完整训练流水线启动脚本</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ↓ Arrow 1 ↓ -->
+  <div class="arrow-section">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">调用模型层接口</div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- ═══ Model Layer ═══ -->
+  <div class="layer layer-model">
+    <div class="layer-header">
+      <span>模型层</span>
+      <span class="en">Model Layer</span>
+    </div>
+    <div class="layer-body">
+      <div class="module">
+        <div class="mod-name">推理模块</div>
+        <div class="mod-path">src/predict.py</div>
+        <div class="mod-desc">模型加载 · 单张图片推理<br>Top-K 分类结果返回</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">训练模块</div>
+        <div class="mod-path">src/train.py</div>
+        <div class="mod-desc">训练循环 · 验证评估<br>最佳模型保存 · 学习率调度</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">评估模块</div>
+        <div class="mod-path">src/evaluate.py</div>
+        <div class="mod-desc">测试集评估 · 混淆矩阵<br>训练曲线绘制 · 错误分析</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">模型定义</div>
+        <div class="mod-path">src/model.py</div>
+        <div class="mod-desc">EfficientNet-B0 (5.3M 参数)<br>ResNet-50 · 自定义分类头</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ↓ Arrow 2 ↓ -->
+  <div class="arrow-section">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">读写数据层资源</div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- ═══ Data Layer ═══ -->
+  <div class="layer layer-data">
+    <div class="layer-header">
+      <span>数据层</span>
+      <span class="en">Data Layer</span>
+    </div>
+    <div class="layer-body">
+      <div class="module">
+        <div class="mod-name">数据集</div>
+        <div class="mod-path">archive/</div>
+        <div class="mod-desc">train / valid / test 三级划分<br>100 类运动图片 · 共 14,493 张</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">数据管道</div>
+        <div class="mod-path">src/dataset.py</div>
+        <div class="mod-desc">DataLoader 构建与数据增强<br>随机裁剪 · 翻转 · 旋转 · 色彩抖动</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">全局配置</div>
+        <div class="mod-path">src/config.py</div>
+        <div class="mod-desc">路径常量 · 超参数统一管理<br>IMAGE_SIZE=224 · BATCH_SIZE=32 · LR=1e-4</div>
+      </div>
+      <div class="module">
+        <div class="mod-name">持久化存储</div>
+        <div class="mod-path">outputs/</div>
+        <div class="mod-desc">models/ — 模型权重文件<br>figures/ — 评估图表与可视化</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Legend ── -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background: linear-gradient(135deg, #4472C4, #5B9BD5);"></div>
+      <span>应用层（Application）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: linear-gradient(135deg, #548235, #70AD47);"></div>
+      <span>模型层（Model）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: linear-gradient(135deg, #595959, #808080);"></div>
+      <span>数据层（Data）</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

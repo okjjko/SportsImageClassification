@@ -31,6 +31,9 @@ web/dist/
 # Uploaded images
 web/history_images/
 
+# Workspace
+workspace/
+
 # Temp
 Thumbs.db
 .DS_Store

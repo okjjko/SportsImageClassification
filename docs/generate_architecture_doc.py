@@ -128,124 +128,20 @@ def add_body_text(doc, text, bold=False, size=11):
 # ─── 第一部分：系统架构图 ─────────────────────────────────
 
 def build_architecture_diagram(doc):
-    """生成三层架构图（用表格模拟）"""
+    """生成三层架构图（使用预渲染的 PNG 图片）"""
     add_heading_styled(doc, "一、系统架构图", level=1)
     add_body_text(doc, "本系统采用经典的三层架构设计，自上而下分为应用层、模型层和数据层。各层之间通过明确的接口进行交互，层间依赖关系通过箭头标注。")
     doc.add_paragraph()
 
-    # 架构图主体表格（7 行 1 列：应用层标题、应用层内容、箭头、模型层标题、模型层内容、箭头、数据层内容）
-    table = doc.add_table(rows=7, cols=1)
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    remove_table_borders(table)
-
-    # 设置列宽
-    for row in table.rows:
-        row.cells[0].width = Cm(16)
-
-    # ── 应用层标题 ──
-    cell = table.cell(0, 0)
-    set_cell_shading(cell, BLUE_HEADER)
-    set_cell_text(cell, "应用层（Application Layer）", bold=True, size=12, color=HEADER_TEXT)
-
-    # ── 应用层内容（嵌套表格） ──
-    cell = table.cell(1, 0)
-    set_cell_shading(cell, BLUE_BG)
-    inner = cell.add_table(rows=1, cols=2)
-    remove_table_borders(inner)
-    inner.autofit = True
-
-    c1 = inner.cell(0, 0)
-    set_cell_shading(c1, BLUE_CELL)
-    set_cell_text(c1, "Gradio Web 界面\nsrc/app.py\n图片上传 · Top-3 结果展示", size=9, color=DARK_TEXT)
-
-    c2 = inner.cell(0, 1)
-    set_cell_shading(c2, BLUE_CELL)
-    set_cell_text(c2, "训练入口\nrun_train.py\n数据分析 → 训练 → 评估流水线", size=9, color=DARK_TEXT)
-
-    # ── 箭头行 1 ──
-    cell = table.cell(2, 0)
-    set_cell_shading(cell, GRAY_BG)
-    set_cell_text(cell, "▼  调用模型层接口  ▼", size=10, color="666666")
-
-    # ── 模型层标题 ──
-    cell = table.cell(3, 0)
-    set_cell_shading(cell, ORANGE_HEADER)
-    set_cell_text(cell, "模型层（Model Layer）", bold=True, size=12, color=HEADER_TEXT)
-
-    # ── 模型层内容 ──
-    cell = table.cell(4, 0)
-    set_cell_shading(cell, ORANGE_BG)
-    inner = cell.add_table(rows=2, cols=3)
-    remove_table_borders(inner)
-
-    cells_data = [
-        ("推理模块\nsrc/predict.py\n模型加载 · 单张推理", ORANGE_CELL),
-        ("训练模块\nsrc/train.py\n训练循环 · 验证 · 保存", ORANGE_CELL),
-        ("评估模块\nsrc/evaluate.py\n测试评估 · 混淆矩阵", ORANGE_CELL),
-        ("模型定义\nsrc/model.py\nEfficientNet-B0 / ResNet-50", ORANGE_CELL),
-        ("", WHITE),  # 空
-        ("", WHITE),  # 空
-    ]
-    for i, (txt, clr) in enumerate(cells_data):
-        r, c = divmod(i, 3)
-        inner_cell = inner.cell(r, c)
-        set_cell_shading(inner_cell, clr)
-        if txt:
-            set_cell_text(inner_cell, txt, size=9, color=DARK_TEXT)
-
-    # ── 箭头行 2 ──
-    cell = table.cell(5, 0)
-    set_cell_shading(cell, GRAY_BG)
-    set_cell_text(cell, "▼  读写数据层资源  ▼", size=10, color="666666")
-
-    # ── 数据层标题+内容（合并） ──
-    cell = table.cell(6, 0)
-    set_cell_shading(cell, GREEN_BG)
-
-    # 数据层标题
-    p = cell.paragraphs[0]
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run("数据层（Data Layer）")
-    run.font.size = Pt(12)
-    run.font.bold = True
-    run.font.color.rgb = RGBColor.from_string("2E7D32")
-    run.font.name = "微软雅黑"
-    run._element.rPr.rFonts.set(qn("w:eastAsia"), "微软雅黑")
-
-    # 数据层内嵌表格
-    inner = cell.add_table(rows=2, cols=4)
-    remove_table_borders(inner)
-
-    data_items = [
-        ("数据集\narchive/\ntrain/valid/test\n100 类", GREEN_CELL),
-        ("数据管道\nsrc/dataset.py\nDataLoader · 数据增强", GREEN_CELL),
-        ("全局配置\nsrc/config.py\n路径常量 · 超参数", GREEN_CELL),
-        ("持久化存储\noutputs/\nmodels/ + figures/", GREEN_CELL),
-    ]
-    for i, (txt, clr) in enumerate(data_items):
-        r, c = divmod(i, 4)
-        inner_cell = inner.cell(r, c)
-        set_cell_shading(inner_cell, clr)
-        set_cell_text(inner_cell, txt, size=9, color=DARK_TEXT)
-    # 第二行空
-    for c in range(4):
-        set_cell_shading(inner.cell(1, c), WHITE)
-
-    # ── 图例 ──
-    doc.add_paragraph()
-    legend_table = doc.add_table(rows=1, cols=3)
-    legend_table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    remove_table_borders(legend_table)
-
-    legends = [
-        ("■ 应用层", BLUE_HEADER, HEADER_TEXT),
-        ("■ 模型层", ORANGE_HEADER, HEADER_TEXT),
-        ("■ 数据层", GREEN_HEADER, HEADER_TEXT),
-    ]
-    for i, (txt, bg, fg) in enumerate(legends):
-        cell = legend_table.cell(0, i)
-        set_cell_shading(cell, bg)
-        set_cell_text(cell, txt, bold=True, size=10, color=fg)
+    # 插入预渲染的架构图 PNG
+    img_path = os.path.join(os.path.dirname(__file__), "architecture_diagram.png")
+    if os.path.exists(img_path):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run()
+        run.add_picture(img_path, width=Cm(16))
+    else:
+        add_body_text(doc, f"[架构图缺失：{img_path}]")
 
 
 # ─── 第二部分：模块划分说明 ───────────────────────────────
@@ -328,15 +224,32 @@ MODULE_INFO = [
         "deps": "config, dataset, model, torch, PIL",
     },
     {
-        "name": "Web 应用模块",
-        "path": "src/app.py",
-        "desc": "基于 Gradio 构建 Web 交互界面，提供图片上传和实时分类功能",
+        "name": "前端 Web 模块",
+        "path": "web/src/",
+        "desc": "基于 React 19 + Vite 构建的前端界面，提供单张识别、批量分类、历史记录等功能",
         "interfaces": [
-            ("_get_model", "—", "tuple[nn.Module, list, device]", "懒加载模型单例（首次调用时加载）"),
-            ("predict", "image", "dict", "Gradio 预测回调，返回 {类别: 置信度}"),
-            ("create_interface", "—", "tuple[Blocks, str]", "构建 Gradio 界面和 CSS 样式"),
+            ("App", "—", "React Component", "主应用组件，包含标签页切换与状态管理"),
+            ("SingleTab", "—", "React Component", "单张图片识别界面，支持拖拽上传和示例图片"),
+            ("BatchTab", "—", "React Component", "批量图片分类界面，多文件上传与并发推理"),
+            ("Sidebar", "—", "React Component", "识别历史侧边栏，展示过往识别记录"),
+            ("DetailPanel", "—", "React Component", "识别结果详情面板，展示 Top-3 置信度"),
         ],
-        "deps": "config, predict, gradio, PIL",
+        "deps": "React 19, Vite, api.js (Fetch 请求后端 API)",
+    },
+    {
+        "name": "后端 API 模块",
+        "path": "src/api.py + run_api.py",
+        "desc": "基于 FastAPI 构建的 RESTful API 后端，处理图片分类请求与历史记录管理",
+        "interfaces": [
+            ("GET /api/status", "—", "JSON", "返回模型状态与准确率信息"),
+            ("GET /api/examples", "—", "JSON", "返回示例图片列表"),
+            ("POST /api/predict/single", "UploadFile", "JSON", "单张图片分类，返回 Top-3 结果"),
+            ("POST /api/predict/batch", "list[UploadFile]", "JSON", "批量图片分类"),
+            ("GET /api/history", "—", "JSON", "获取识别历史记录列表"),
+            ("GET /api/history/{id}", "entry_id: int", "JSON", "获取单条历史记录详情"),
+            ("DELETE /api/history", "—", "JSON", "清空全部历史记录"),
+        ],
+        "deps": "config, predict, fastapi, uvicorn, PIL",
     },
 ]
 
@@ -413,9 +326,9 @@ def build_dependency_diagram(doc):
     doc.add_paragraph()
 
     dep_lines = [
-        "app.py ──→ predict.py ──→ model.py ──→ config.py",
-        "  │               └──→ dataset.py ──→ config.py",
-        "  └──→ config.py",
+        "web/ (React) ──HTTP──→ run_api.py ──→ api.py ──→ predict.py ──→ model.py ──→ config.py",
+        "                                              │              └──→ dataset.py ──→ config.py",
+        "                                              └──→ config.py",
         "",
         "run_train.py ──→ train.py ──→ model.py ──→ config.py",
         "     │              └──→ dataset.py ──→ config.py",
@@ -507,13 +420,13 @@ def build_data_flow_diagram(doc):
     add_heading_styled(doc, "推理管线数据流", level=2)
 
     infer_steps = [
-        ("用户上传图片\nGradio Image 组件", FLOW_INFER),
-        ("Gradio 接收\n统一转为 PIL Image", FLOW_INFER),
+        ("用户上传图片\nReact 前端组件", FLOW_INFER),
+        ("FastAPI 接收\nUploadFile 转 PIL", FLOW_INFER),
         ("图像预处理\nRGB 转换\nResize(256)\nCenterCrop(224)\nImageNet 归一化", FLOW_INFER),
         ("模型前向推理\nEfficientNet-B0\nno_grad()", FLOW_INFER),
         ("Softmax\n概率归一化", FLOW_INFER),
         ("Top-3 筛选\ntorch.topk(k=3)", FLOW_INFER),
-        ("结果展示\nGradio Label 组件\n{类别: 置信度}", FLOW_INFER),
+        ("JSON 响应\n{类别: 置信度}\nReact 渲染结果", FLOW_INFER),
     ]
 
     infer_table = doc.add_table(rows=1, cols=len(infer_steps) * 2 - 1)
@@ -541,7 +454,7 @@ def build_data_flow_diagram(doc):
     set_cell_shading(hub_cell, FLOW_HUB)
     set_cell_text(
         hub_cell,
-        "连接枢纽：best_model.pth\n训练管线产出  ──→  best_model.pth  ──→  推理管线消费",
+        "连接枢纽：best_model.pth\n训练管线产出  ──→  best_model.pth  ──→  API 推理管线消费",
         bold=True, size=11, color="7F6000",
     )
 

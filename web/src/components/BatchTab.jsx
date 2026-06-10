@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import React, { useState, useRef } from "react"
 import { predictBatch } from "../api"
 
 export default function BatchTab({ onPredictionDone }) {
@@ -143,16 +143,15 @@ export default function BatchTab({ onPredictionDone }) {
                   return (
                     <tr key={i}>
                       <td>{r.filename}</td>
-                      {[0, 1, 2].map((j) => (
-                        <td key={`c${j}`}>
-                          {r.results[j] ? r.results[j]["class"] : ""}
-                        </td>
-                      ))}
-                      {[0, 1, 2].map((j) => (
-                        <td key={`p${j}`}>
-                          {r.results[j] ? r.results[j].confidence.toFixed(4) : ""}
-                        </td>
-                      ))}
+                      {[0, 1, 2].map((j) => {
+                        const p = r.results[j]
+                        return (
+                          <React.Fragment key={j}>
+                            <td>{p ? p["class"] : ""}</td>
+                            <td>{p ? p.confidence.toFixed(4) : ""}</td>
+                          </React.Fragment>
+                        )
+                      })}
                     </tr>
                   )
                 })}
