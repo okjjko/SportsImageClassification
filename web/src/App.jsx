@@ -40,33 +40,32 @@ export default function App() {
         <Header />
         <div className="main-layout">
           <div className="content-area">
-            {isDetail ? (
+            {isDetail && (
               <DetailPanel entry={selectedEntry} onBack={handleBack} />
-            ) : (
-              <>
-                <div className="tabs">
-                  <button
-                    className={`tab-btn ${activeTab === "single" ? "active" : ""}`}
-                    onClick={() => setActiveTab("single")}
-                  >
-                    单张识别
-                  </button>
-                  <button
-                    className={`tab-btn ${activeTab === "batch" ? "active" : ""}`}
-                    onClick={() => setActiveTab("batch")}
-                  >
-                    批量分类
-                  </button>
-                </div>
-
-                {activeTab === "single" && (
-                  <SingleTab onPredictionDone={refreshHistory} />
-                )}
-                {activeTab === "batch" && (
-                  <BatchTab onPredictionDone={refreshHistory} />
-                )}
-              </>
             )}
+            <div className={isDetail ? "main-content hidden" : "main-content"}>
+              <div className="tabs">
+                <button
+                  className={`tab-btn ${activeTab === "single" ? "active" : ""}`}
+                  onClick={() => setActiveTab("single")}
+                >
+                  单张识别
+                </button>
+                <button
+                  className={`tab-btn ${activeTab === "batch" ? "active" : ""}`}
+                  onClick={() => setActiveTab("batch")}
+                >
+                  批量分类
+                </button>
+              </div>
+
+              {activeTab === "single" && (
+                <SingleTab onPredictionDone={refreshHistory} />
+              )}
+              {activeTab === "batch" && (
+                <BatchTab onPredictionDone={refreshHistory} />
+              )}
+            </div>
           </div>
         </div>
         <Footer />

@@ -237,6 +237,10 @@ h1, h2, h3, h4 {
 .col-4 { flex: 4; }
 .col-5 { flex: 5; }
 
+.main-content.hidden {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .row { flex-direction: column; }
   .app-header h1 { font-size: 20px; }
